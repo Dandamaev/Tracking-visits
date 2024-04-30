@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="pics/logo.svg">
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <title>QR код</title>
+</head>
+
+<body>
+    <div class="gqr">
+        <div id="qrcode"></div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        var qr = new QRCode(document.getElementById("qrcode"), {
+            width: 200,
+            height: 200
+        });
+        qr.makeCode(`https://se.ifmo.ru/~s289137/application/check.html?token=${token}`);
+    </script>
+</body>
+
+</html>

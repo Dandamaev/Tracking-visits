@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="pics/logo.svg">
+    <link rel="stylesheet" href="style.css">
+    <title>Занятие</title>
+</head>
+
+<body>
+    <div class="info">
+        <div class="currently">
+            <p id="subject_name" class="subject"></p>
+            <p id="group_name" class="group"></p>
+            <div class="location">
+                <img src="pics/location.svg">
+                <p id="location" class="place"></p>
+            </div>
+            <div class="ifn">
+                <div id="type" class="type"></div>
+                <img src="pics/clock.svg">
+                <div id="time" class="time"></div>
+            </div>
+        </div>
+        <div class="buttons">
+            <button class="btn" id="gen_qr">
+                Сгенерировать QR
+            </button>
+            <button class="btn" id="back">
+                Вернуться
+            </button>
+        </div>
+    </div>
+
+    <div class="list" id="student-list">
+
+    </div>
+    <script>// Получение параметров из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const classId = urlParams.get('classId');
+        const accessToken = localStorage.getItem('accessToken');
+
+        // Проверка наличия accessToken
+        if (!accessToken) {
+            console.error('Access token not found. Please authenticate first.');
+            // Здесь можно перенаправить пользователя на страницу входа или выполнить другие действия
+        }
+
+        // Выполнение запроса на получение информации о занятии
+        fetch(`api/get_class_info.php?ClassID=${classId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            mode: 'cors'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+
+                // Обработка времени без секунд
+                const startTimeWithoutSeconds = data.start_time.split(":").slice(0, 2).join(":");
+                const endTimeWithoutSeconds = data.end_time.split(":").slice(0, 2).join(":");
+
+                // Установка значений в элементы HTML
+                document.getElementById('subject_name').textContent = data.subject_name;
+                document.getElementById('group_name').textContent = data.group_name;
+                document.getElementById('location').textContent = `Ауд: ${data.classroom}, ${data.building}`;
+                document.getElementById('type').textContent = data.class_type;
+                document.getElementById('type').classList.add(data.class_type);
+                document.getElementById('time').textContent = `${startTimeWithoutSeconds} - ${endTimeWithoutSeconds}`;
+            })
+
+            .catch(error => {
+                console.error('Ошибка при выполнении запроса:', error.message);
+                // Здесь можно обработать ошибку, например, показать сообщение об ошибке на странице
+            });
+
+        fetch(`api/get_students.php?ClassID=${classId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            mode: 'cors'
+        })
+            .then(response => response.json()) // Парсим JSON из ответа сервера
+            .then(students => {
+                // Находим контейнер для таблицы студентов
+                const tableContainer = document.getElementById('student-list');
+
+                // Создаем таблицу
+                const table = document.createElement('table');
+
+                // Создаем заголовок таблицы
+                const tableHeader = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                const headerCells = ['№', 'ITMO ID', 'Группа', 'ФИО', 'Присутствие']; // Заголовки столбцов таблицы
+
+                headerCells.forEach(cellText => {
+                    const cell = document.createElement('th');
+                    cell.textContent = cellText;
+                    headerRow.appendChild(cell);
+                });
+
+                tableHeader.appendChild(headerRow);
+                table.appendChild(tableHeader);
+
+                // Создаем тело таблицы
+                const tableBody = document.createElement('tbody');
+
+                // Добавляем строки с данными о студентах в тело таблицы
+                students.students.forEach((student, index) => {
+                    const row = document.createElement('tr');
+                    const numberCell = document.createElement('td'); // Ячейка для номера
+                    const itmoIdCell = document.createElement('td');
+                    const groupNameCell = document.createElement('td');
+                    const fullNameCell = document.createElement('td');
+                    const statusCell = document.createElement('td');
+
+                    // Устанавливаем номер студента
+                    numberCell.textContent = index + 1;
+
+                    itmoIdCell.textContent = student.itmo_id;
+                    groupNameCell.textContent = student.group_name;
+                    fullNameCell.textContent = student.full_name;
+                    statusCell.textContent = student.status;
+
+                    row.appendChild(numberCell); // Добавляем ячейку с номером
+                    row.appendChild(itmoIdCell);
+                    row.appendChild(groupNameCell);
+                    row.appendChild(fullNameCell);
+                    row.appendChild(statusCell);
+
+                    tableBody.appendChild(row);
+                });
+
+                table.appendChild(tableBody);
+
+                // Очищаем контейнер перед добавлением новой таблицы
+                tableContainer.innerHTML = '';
+
+                // Добавляем таблицу в контейнер
+                tableContainer.appendChild(table);
+            })
+            .catch(error => {
+                console.error('Ошибка при выполнении запроса:', error.message);
+                // Здесь можно обработать ошибку, например, показать сообщение об ошибке на
+            });
+
+        document.getElementById("back").addEventListener("click", function () {
+            window.location.href = "index.html";
+        });
+
+        document.getElementById("gen_qr").addEventListener("click", function () {
+
+            // Отправка запроса к PHP
+            fetch(`api/generate_qr.php?ClassID=${classId}`, {
+                method: "POST",
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Произошла ошибка: " + response.status);
+                    }
+                    // Парсим JSON ответ
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                    // Получаем JWT из ответа
+                    const jwt = data.token;
+
+                    // Перенаправляем на qr_code.html, добавляя JWT в качестве параметра в URL
+                    const url = `qr_code.html?token=${jwt}`;
+                    window.location.href = url;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        });
+
+    </script>
+</body>
+
+</html>

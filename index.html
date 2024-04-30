@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="pics/logo.svg">
+    <link rel="stylesheet" href="style.css">
+    <title>Расписание</title>
+</head>
+
+<body>
+    <div class="info">
+        <div class="currently">
+            <span id="current-weekday"></span>
+            <span id="current-date"></span>
+            <span id="current-week"></span>
+        </div>
+    </div>
+    <div class="list" id="schedule-list">
+
+    </div>
+
+    <script>
+        var accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+            window.location.href = "auth.html?rediret=index.";
+        }
+
+        // Функция для определения номера недели в году
+        function getWeekNumber(date) {
+            const startOfYear = new Date(date.getFullYear(), 0, 1);
+            const diff = date - startOfYear;
+            const oneWeekInMilliseconds = 604800000; // 7 дней в миллисекундах
+            const weekNumber = Math.ceil((diff / oneWeekInMilliseconds) + 1);
+            return weekNumber;
+        }
+
+        // Получаем текущую дату
+        const currentDate = new Date();
+
+        // Получаем день недели
+        const dayOfWeekNumber = currentDate.getDay();
+
+        // Массив с названиями дней недели
+        const daysOfWeek = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+
+        // Получаем название дня недели из массива
+        const dayOfWeekName = daysOfWeek[dayOfWeekNumber];
+
+        // Форматируем дату
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = currentDate.toLocaleDateString("ru-RU", options);
+
+        // Определяем дату, с которой начинается первая неделя (22 апреля 2024)
+        const startDate = new Date(2024, 3, 22); // Месяцы начинаются с 0, поэтому 3 - это апрель
+
+        // Вычисляем разницу в миллисекундах между текущей датой и стартовой датой
+        const timeDifference = currentDate.getTime() - startDate.getTime();
+
+        // Преобразуем разницу в дни
+        const dayDifference = Math.floor(timeDifference / (1000 * 3600 * 24));
+
+        // Определяем номер недели
+        const weekNumber = Math.floor(dayDifference / 7) + 1;
+
+        // Определяем четность недели
+        const weekParity = (weekNumber % 2 === 0) ? "Четная" : "Нечетная";
+
+        // Находим элементы для отображения дня недели и даты
+        const dayElement = document.getElementById("current-weekday");
+        const dateElement = document.getElementById("current-date");
+        const weekElement = document.getElementById("current-week");
+
+        // Устанавливаем текст элементов
+        dayElement.textContent = dayOfWeekName;
+        dateElement.textContent = formattedDate;
+        weekElement.textContent = weekParity;
+
+        fetch('api/get_schedule.php', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            mode: 'cors'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const scheduleContainer = document.getElementById('schedule-list');
+                if (data && data.length > 0) {
+                    const scheduleHtml = generateScheduleHtml(data);
+                    scheduleContainer.innerHTML = scheduleHtml;
+                    scheduleContainer.addEventListener('click', (event) => {
+                        const lessonElement = event.target.closest('.lesson');
+                        if (lessonElement) {
+                            const classId = lessonElement.getAttribute('data-class-id');
+                            redirectToLessonPage(classId);
+                        }
+                    });
+                } else {
+                    scheduleContainer.innerHTML = '<div class="messege">Сегодня у вас нет занятий</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                // Дополнительная обработка ошибки, например, отображение сообщения пользователю
+            });
+
+        function generateScheduleHtml(data) {
+            return data.map(item => {
+                const startTimeWithoutSeconds = item.start_time.slice(0, -3);
+                const endTimeWithoutSeconds = item.end_time.slice(0, -3);
+                return `
+            <div class="lesson"  data-class-id="${item.class_id}">
+                <p class="subject">${item.subject_name}</p> 
+                <p class="group">${item.group_name}</p>
+                <div class="location">
+                    <p class="place"><img src="pics/location.svg"> Ауд: ${item.classroom}, ${item.building}</p>
+                </div>
+                <div class="ifn">
+                    <div class="${item.class_type} type">${item.class_type}</div>
+                    <div class="time"> 
+                        <img src="pics/clock.svg">
+                        ${startTimeWithoutSeconds} - ${endTimeWithoutSeconds}
+                    </div>
+                </div>
+            </div>`;
+            }).join('');
+        }
+
+        function redirectToLessonPage(classId) {
+            window.location.href = `cr_sbj.html?classId=${classId}`;
+        }
+
+    </script>
+</body>
+
+</html>

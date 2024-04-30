@@ -1,0 +1,19 @@
+<svg width="644" height="637" viewBox="0 0 644 637" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0_90_224" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="644" height="637">
+<path d="M644 0H0V636.975H644V0Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_90_224)">
+<path d="M316.44 196.608L85.0749 89.7225C80.3048 87.523 74.9873 86.7529 69.7805 87.5072C53.4012 89.7776 38.3933 105.844 38.3615 125.348L37.46 604.427C37.46 624.183 52.604 635.802 68.8229 633.547C75.0089 632.689 81.3528 629.811 87.0676 624.616L282.383 446.918L197.77 407.827C178.093 398.758 168.886 380.004 167.977 362.375C167.072 344.8 174.009 326.185 188.729 312.796L316.44 196.608Z" fill="url(#paint0_radial_90_224)"/>
+<path d="M572.875 3.43139C589.118 1.17674 604.277 12.7968 604.238 32.5525L603.345 511.631C603.305 531.119 588.297 547.185 571.926 549.472C566.718 550.227 561.401 549.457 556.631 547.256L207.97 386.176C188.044 376.992 186.53 347.248 205.077 330.377L554.63 12.3632C560.353 7.16814 566.689 4.29067 572.875 3.43139Z" fill="url(#paint1_radial_90_224)"/>
+</g>
+<defs>
+<radialGradient id="paint0_radial_90_224" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(873.115 216.012) rotate(173.014) scale(840.315 320.792)">
+<stop stop-color="#E02E2E"/>
+<stop offset="1" stop-color="#EE215B"/>
+</radialGradient>
+<radialGradient id="paint1_radial_90_224" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(36.2757 417.516) rotate(-9.87552) scale(575.824 326.189)">
+<stop stop-color="#0091FF"/>
+<stop offset="1" stop-color="#1846C7"/>
+</radialGradient>
+</defs>
+</svg>

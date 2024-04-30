@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Присутствие</title>
+</head>
+
+<body>
+
+    <div id="str">
+
+    </div>
+
+    <script>
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        var accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+            window.location.href = `auth.html?redirect=check.html?token=${token}`; // Обратите внимание на обратные кавычки и ${}
+        }
+
+        fetch(`api/record.php?token=${token}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            mode: 'cors'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    // Если ответ сервера не ок, считываем текст ошибки
+                    return response.text().then(errorMsg => {
+                        throw new Error(errorMsg);
+                    });
+                }
+                return response.json(); // Возвращаем JSON ответ
+            })
+            .then(data => {
+                document.getElementById('str').textContent = data.message;
+            })
+            .catch(error => {
+                // Обработка ошибок
+                document.getElementById('str').textContent = 'Произошла ошибка: ' + error.message;
+            });
+
+
+    </script>
+</body>
+
+</html>
