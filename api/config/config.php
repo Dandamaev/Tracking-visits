@@ -4,6 +4,6 @@ $host = 'pg';
 $port = '5432';
 $dbname = 'studs';
 $username = 's289137';
-$password = '1bZNEbKcHEulHmJ0';
+$password = '***********';
 
-$secretKey = 'its_back_door';
+$secretKey = '**********';
